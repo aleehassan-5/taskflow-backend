@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum Status {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  avatar    String?
+  role      Role     @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  createdTasks    Task[]        @relation("CreatedTasks")
+  assignedTasks   Task[]        @relation("AssignedTasks")
+  completedTasks  Task[]        @relation("CompletedTasks")
+  historyEntries  TaskHistory[]
+  notifications   Notification[]
+}
+
+model Task {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  status        Status    @default(PENDING)
+  priority      Priority  @default(MEDIUM)
+  dueDate       DateTime?
+  tags          String[]  @default([])
+
+  assignedToId  String?
+  assignedTo    User?     @relation("AssignedTasks", fields: [assignedToId], references: [id])
+
+  createdById   String
+  createdBy     User      @relation("CreatedTasks", fields: [createdById], references: [id])
+
+  completedById String?
+  completedBy   User?     @relation("CompletedTasks", fields: [completedById], references: [id])
+  completedAt   DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  history       TaskHistory[]
+  notifications Notification[]
+}
+
+model TaskHistory {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  action    String
+  byId      String
+  by        User     @relation(fields: [byId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  taskId    String?
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
