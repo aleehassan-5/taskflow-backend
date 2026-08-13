@@ -133,6 +133,7 @@ model Hire {
 
   compensationType  CompensationType @default(SALARY)
   compensationValue Float?           // salary amount, or percentage rate
+  compensationRangeIds String[] @default([]) // ids of selected CompensationRange presets (multi-select tags)
 
   status HireStatus @default(INTERVIEWING)
   source String?    // e.g. referral, LinkedIn, Upwork

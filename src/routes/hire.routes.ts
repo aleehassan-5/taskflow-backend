@@ -42,6 +42,7 @@ const compensationSchema = z
   .object({
     compensationType: z.enum(["SALARY", "PERCENTAGE"]).optional(),
     compensationValue: z.number().nonnegative().optional(),
+    compensationRangeIds: z.array(z.string()).optional(),
   })
   .refine(
     (data) =>
@@ -79,6 +80,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
       role: data.role,
       compensationType: data.compensationType ?? "SALARY",
       compensationValue: data.compensationValue,
+      compensationRangeIds: data.compensationRangeIds ?? [],
       status: data.status ?? "INTERVIEWING",
       source: data.source,
       notes: data.notes,
@@ -122,6 +124,7 @@ router.patch("/:id", requireAuth, async (req, res) => {
       role: data.role,
       compensationType: data.compensationType,
       compensationValue: data.compensationValue,
+      compensationRangeIds: data.compensationRangeIds,
       status: data.status,
       source: data.source,
       notes: data.notes,
