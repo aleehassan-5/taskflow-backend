@@ -5,10 +5,10 @@ import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
-// GET /api/compensation-ranges - list all ranges, lowest amount first
+// GET /api/compensation-ranges - list all ranges, lowest amount first, flat rates last
 router.get("/", requireAuth, async (_req, res) => {
   const ranges = await prisma.compensationRange.findMany({
-    orderBy: { minValue: "asc" },
+    orderBy: [{ isFlat: "asc" }, { minValue: "asc" }],
   });
   res.json({ ranges });
 });
@@ -16,11 +16,16 @@ router.get("/", requireAuth, async (_req, res) => {
 const rangeSchema = z
   .object({
     label: z.string().min(1),
-    minValue: z.number().nonnegative(),
+    isFlat: z.boolean().optional().default(false),
+    minValue: z.number().nonnegative().nullable().optional(),
     maxValue: z.number().nonnegative().nullable().optional(),
     percentage: z.number().min(0).max(100),
   })
-  .refine((data) => data.maxValue == null || data.maxValue >= data.minValue, {
+  .refine((data) => data.isFlat || data.minValue != null, {
+    message: "Min value is required unless this is a flat rate",
+    path: ["minValue"],
+  })
+  .refine((data) => data.maxValue == null || data.minValue == null || data.maxValue >= data.minValue, {
     message: "Max value must be greater than or equal to min value",
   });
 
@@ -33,8 +38,9 @@ router.post("/", requireAuth, async (req, res) => {
   const range = await prisma.compensationRange.create({
     data: {
       label: data.label,
-      minValue: data.minValue,
-      maxValue: data.maxValue ?? null,
+      isFlat: data.isFlat,
+      minValue: data.isFlat ? null : data.minValue,
+      maxValue: data.isFlat ? null : data.maxValue ?? null,
       percentage: data.percentage,
     },
   });
@@ -44,7 +50,8 @@ router.post("/", requireAuth, async (req, res) => {
 const updateSchema = z
   .object({
     label: z.string().min(1).optional(),
-    minValue: z.number().nonnegative().optional(),
+    isFlat: z.boolean().optional(),
+    minValue: z.number().nonnegative().nullable().optional(),
     maxValue: z.number().nonnegative().nullable().optional(),
     percentage: z.number().min(0).max(100).optional(),
   })
@@ -66,8 +73,9 @@ router.patch("/:id", requireAuth, async (req, res) => {
     where: { id: req.params.id },
     data: {
       label: data.label,
-      minValue: data.minValue,
-      maxValue: data.maxValue,
+      isFlat: data.isFlat,
+      minValue: data.isFlat ? null : data.minValue,
+      maxValue: data.isFlat ? null : data.maxValue,
       percentage: data.percentage,
     },
   });
