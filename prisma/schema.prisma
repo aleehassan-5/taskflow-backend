@@ -38,6 +38,12 @@ enum CompensationType {
   PERCENTAGE
 }
 
+enum PunishmentStatus {
+  PENDING
+  DONE
+  FORGIVEN
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -53,6 +59,8 @@ model User {
   historyEntries  TaskHistory[]
   notifications   Notification[]
   addedHires      Hire[]
+  punishmentsReceived Punishment[] @relation("PunishmentUser")
+  punishmentsIssued   Punishment[] @relation("PunishmentIssuedBy")
 }
 
 model Task {
@@ -79,6 +87,7 @@ model Task {
 
   history       TaskHistory[]
   notifications Notification[]
+  punishments   Punishment[]
 
   @@index([status])
   @@index([priority])
@@ -152,4 +161,26 @@ model Hire {
 
   @@index([status])
   @@index([addedById])
+}
+
+model Punishment {
+  id         String            @id @default(cuid())
+  reason     String
+  punishment String
+  status     PunishmentStatus  @default(PENDING)
+
+  userId     String
+  user       User              @relation("PunishmentUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  issuedById String
+  issuedBy   User              @relation("PunishmentIssuedBy", fields: [issuedById], references: [id])
+
+  taskId     String?
+  task       Task?             @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }

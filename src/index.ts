@@ -8,6 +8,7 @@ import userRoutes from "./routes/user.routes";
 import notificationRoutes from "./routes/notification.routes";
 import hireRoutes from "./routes/hire.routes";
 import compensationRangeRoutes from "./routes/compensationRange.routes";
+import punishmentRoutes from "./routes/punishment.routes";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/hires", hireRoutes);
 app.use("/api/compensation-ranges", compensationRangeRoutes);
+app.use("/api/punishments", punishmentRoutes);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
