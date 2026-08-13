@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import authRoutes from "./routes/auth.routes";
 import taskRoutes from "./routes/task.routes";
 import userRoutes from "./routes/user.routes";
@@ -10,6 +11,7 @@ import compensationRangeRoutes from "./routes/compensationRange.routes";
 
 const app = express();
 
+app.use(compression());
 app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173" }));
 app.use(express.json());
 
