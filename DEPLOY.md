@@ -35,7 +35,7 @@ frontend ko backend ka URL chahiye).
    |---|---|
    | Root Directory | *(khali chhodo)* |
    | Build Command | `npm install && npx prisma generate && npm run build` |
-   | Start Command | `npx prisma migrate deploy && npx prisma db seed && npm start` |
+   | Start Command | `npx prisma db push --accept-data-loss && npx prisma db seed && npm start` |
    | Instance Type | Free |
 
 4. **Environment** tab mein ye variables add karo:
@@ -51,8 +51,9 @@ frontend ko backend ka URL chahiye).
 
 7. Seed data (demo accounts) automatically ban jayenge — Start Command (Step 2.3) mein `prisma db seed`
    already shamil hai, har deploy pe khud chal jata hai. Ye idempotent hai (upsert use karta hai), to
-   dobara chalne se koi duplicate ya masla nahi hota. Free tier pe Shell access nahi hota, isi liye ye
-   Start Command mein bake kiya gaya hai.
+   dobara chalne se koi duplicate ya masla nahi hota. Schema bhi `prisma db push` se khud sync ho jata
+   hai — is project mein migration files use nahi hoti, seedha schema.prisma se DB sync hota hai. Free
+   tier pe Shell access nahi hota, isi liye ye sab Start Command mein bake kiya gaya hai.
 
 > **Free tier note:** Render ki free web services 15 minute inactivity ke baad "sleep" ho jati hain
 > — pehli request pe wapas jagne mein ~30-50 second lag sakte hain. Normal hai, paid tier pe ye
@@ -98,7 +99,7 @@ Ab Vercel wala frontend URL kholo, login karo (`ali@syntralogic.com` ya `arooj@s
 | Frontend pe "Network Error" | `VITE_API_URL` galat hai, ya Render service abhi "sleeping" hai (30-50 sec wait karo) |
 | Login pe CORS error | `CORS_ORIGIN` Render pe Vercel URL se exactly match nahi karta (https://, trailing slash check karo) |
 | Backend deploy fail, Prisma error | `DATABASE_URL` mein password galat hai, ya Transaction pooler (6543) use kar liya — Session pooler (5432) use karo |
-| "relation does not exist" DB errors | Start Command mein `prisma migrate deploy` missing hai — Step 2.3 check karo |
+| "relation does not exist" DB errors | Start Command mein `prisma db push` missing hai — Step 2.3 check karo |
 
 ## Redeploying after code changes
 
