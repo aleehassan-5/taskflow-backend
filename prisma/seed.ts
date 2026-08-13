@@ -4,14 +4,14 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  const password = await bcrypt.hash("password123", 10);
+  const password = await bcrypt.hash("ALLAH.pk87", 10);
 
   const ali = await prisma.user.upsert({
-    where: { email: "ali@taskflow.dev" },
-    update: {},
+    where: { email: "ali@syntralogic.com" },
+    update: { password },
     create: {
       name: "Ali",
-      email: "ali@taskflow.dev",
+      email: "ali@syntralogic.com",
       password,
       avatar: "AL",
       role: Role.ADMIN,
@@ -19,11 +19,11 @@ async function main() {
   });
 
   const arooj = await prisma.user.upsert({
-    where: { email: "arooj@taskflow.dev" },
-    update: {},
+    where: { email: "arooj@syntralogic.com" },
+    update: { password },
     create: {
       name: "Arooj",
-      email: "arooj@taskflow.dev",
+      email: "arooj@syntralogic.com",
       password,
       avatar: "AR",
       role: Role.MEMBER,
@@ -97,7 +97,40 @@ async function main() {
     });
   }
 
-  console.log("Seed complete. Login with ali@taskflow.dev / arooj@taskflow.dev, password: password123");
+  const existingHires = await prisma.hire.count();
+  if (existingHires === 0) {
+    await prisma.hire.createMany({
+      data: [
+        {
+          name: "Hassan Raza",
+          email: "hassan.raza@example.com",
+          phone: "+92 300 1234567",
+          role: "Frontend Developer",
+          compensationType: "SALARY",
+          compensationValue: 80000,
+          status: "INTERVIEWING",
+          source: "LinkedIn",
+          notes: "Strong React background, second interview scheduled.",
+          addedById: ali.id,
+        },
+        {
+          name: "Sana Malik",
+          email: "sana.malik@example.com",
+          phone: "+92 301 9876543",
+          role: "Sales Consultant",
+          compensationType: "PERCENTAGE",
+          compensationValue: 10,
+          status: "ACTIVE",
+          source: "Referral",
+          notes: "10% commission on closed deals.",
+          startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          addedById: arooj.id,
+        },
+      ],
+    });
+  }
+
+  console.log("Seed complete. Login with ali@syntralogic.com / arooj@syntralogic.com, password: ALLAH.pk87");
 }
 
 main()

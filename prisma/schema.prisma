@@ -24,6 +24,20 @@ enum Priority {
   HIGH
 }
 
+enum HireStatus {
+  INTERVIEWING
+  HIRED
+  ONBOARDING
+  ACTIVE
+  ON_HOLD
+  REJECTED
+}
+
+enum CompensationType {
+  SALARY
+  PERCENTAGE
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -38,6 +52,7 @@ model User {
   completedTasks  Task[]        @relation("CompletedTasks")
   historyEntries  TaskHistory[]
   notifications   Notification[]
+  addedHires      Hire[]
 }
 
 model Task {
@@ -85,4 +100,27 @@ model Notification {
   task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model Hire {
+  id     String @id @default(cuid())
+  name   String
+  email  String?
+  phone  String?
+  role   String  // position they're being hired for
+
+  compensationType  CompensationType @default(SALARY)
+  compensationValue Float?           // salary amount, or percentage rate
+
+  status HireStatus @default(INTERVIEWING)
+  source String?    // e.g. referral, LinkedIn, Upwork
+  notes  String?
+
+  startDate DateTime?
+
+  addedById String
+  addedBy   User   @relation(fields: [addedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
