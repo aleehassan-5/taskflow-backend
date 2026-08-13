@@ -6,6 +6,8 @@ notifications.
 
 Frontend repo: [taskflow-frontend](https://github.com/aleehassan-5/taskflow-frontend)
 
+**Deploying?** See [DEPLOY.md](./DEPLOY.md) for step-by-step Supabase + Render + Vercel setup.
+
 ## Tech Stack
 
 - **Runtime:** Node.js + Express + TypeScript
