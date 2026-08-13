@@ -11,12 +11,22 @@ const STATUS_LABEL: Record<string, string> = {
   COMPLETED: "Completed",
 };
 
-const taskInclude = {
+const taskListInclude = {
+  assignedTo: { select: { id: true, name: true, avatar: true } },
+  createdBy: { select: { id: true, name: true, avatar: true } },
+  completedBy: { select: { id: true, name: true, avatar: true } },
+  _count: { select: { history: true } },
+};
+
+const taskDetailInclude = {
   assignedTo: { select: { id: true, name: true, avatar: true } },
   createdBy: { select: { id: true, name: true, avatar: true } },
   completedBy: { select: { id: true, name: true, avatar: true } },
   history: { include: { by: { select: { id: true, name: true, avatar: true } } }, orderBy: { createdAt: "asc" as const } },
 };
+
+// kept for the mutation endpoints below, which all return the full detail shape
+const taskInclude = taskDetailInclude;
 
 // GET /api/tasks - list with optional filters
 router.get("/", requireAuth, async (req, res) => {
@@ -35,15 +45,28 @@ router.get("/", requireAuth, async (req, res) => {
 
   const tasks = await prisma.task.findMany({
     where,
-    include: taskInclude,
+    include: taskListInclude,
     orderBy: { createdAt: "desc" },
   });
   res.json({ tasks });
 });
 
+// GET /api/tasks/activity/recent - lightweight feed for dashboard, doesn't require loading full task list
+router.get("/activity/recent", requireAuth, async (req, res) => {
+  const entries = await prisma.taskHistory.findMany({
+    take: 8,
+    orderBy: { createdAt: "desc" },
+    include: {
+      by: { select: { id: true, name: true, avatar: true } },
+      task: { select: { id: true, title: true } },
+    },
+  });
+  res.json({ activity: entries });
+});
+
 // GET /api/tasks/:id
 router.get("/:id", requireAuth, async (req, res) => {
-  const task = await prisma.task.findUnique({ where: { id: req.params.id }, include: taskInclude });
+  const task = await prisma.task.findUnique({ where: { id: req.params.id }, include: taskDetailInclude });
   if (!task) return res.status(404).json({ error: "Task not found" });
   res.json({ task });
 });
