@@ -168,6 +168,7 @@ model Punishment {
   reason     String
   punishment String
   status     PunishmentStatus  @default(PENDING)
+  dueDate    DateTime?
 
   userId     String
   user       User              @relation("PunishmentUser", fields: [userId], references: [id], onDelete: Cascade)
@@ -183,4 +184,5 @@ model Punishment {
 
   @@index([userId])
   @@index([status])
+  @@index([dueDate])
 }

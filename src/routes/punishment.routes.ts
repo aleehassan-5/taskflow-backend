@@ -32,6 +32,7 @@ const createSchema = z.object({
   reason: z.string().min(1),
   punishment: z.string().min(1),
   taskId: z.string().min(1).optional(),
+  dueDate: z.string().optional(),
   status: z.enum(["PENDING", "DONE", "FORGIVEN"]).optional().default("PENDING"),
 });
 
@@ -49,6 +50,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
       reason: data.reason,
       punishment: data.punishment,
       taskId: data.taskId ?? null,
+      dueDate: data.dueDate ? new Date(data.dueDate) : null,
       status: data.status,
       issuedById,
     },
@@ -61,30 +63,43 @@ const updateSchema = z.object({
   reason: z.string().min(1).optional(),
   punishment: z.string().min(1).optional(),
   taskId: z.string().min(1).nullable().optional(),
+  dueDate: z.string().nullable().optional(),
   status: z.enum(["PENDING", "DONE", "FORGIVEN"]).optional(),
 });
 
-// PATCH /api/punishments/:id
-router.patch("/:id", requireAuth, async (req, res) => {
+// PATCH /api/punishments/:id - only the person who issued it can change it
+router.patch("/:id", requireAuth, async (req: AuthRequest, res) => {
   const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const data = parsed.data;
 
   const existing = await prisma.punishment.findUnique({ where: { id: req.params.id } });
   if (!existing) return res.status(404).json({ error: "Punishment not found" });
+  if (existing.issuedById !== req.user!.userId) {
+    return res.status(403).json({ error: "Only the person who issued this punishment can change it" });
+  }
 
   const punishment = await prisma.punishment.update({
     where: { id: req.params.id },
-    data,
+    data: {
+      reason: data.reason,
+      punishment: data.punishment,
+      taskId: data.taskId,
+      status: data.status,
+      dueDate: data.dueDate === null ? null : data.dueDate ? new Date(data.dueDate) : undefined,
+    },
     include: punishmentInclude,
   });
   res.json({ punishment });
 });
 
-// DELETE /api/punishments/:id
-router.delete("/:id", requireAuth, async (req, res) => {
+// DELETE /api/punishments/:id - only the person who issued it can delete it
+router.delete("/:id", requireAuth, async (req: AuthRequest, res) => {
   const existing = await prisma.punishment.findUnique({ where: { id: req.params.id } });
   if (!existing) return res.status(404).json({ error: "Punishment not found" });
+  if (existing.issuedById !== req.user!.userId) {
+    return res.status(403).json({ error: "Only the person who issued this punishment can delete it" });
+  }
   await prisma.punishment.delete({ where: { id: req.params.id } });
   res.json({ ok: true });
 });
