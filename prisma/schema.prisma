@@ -112,10 +112,11 @@ model Notification {
 
 model CompensationRange {
   id         String   @id @default(cuid())
-  label      String   // e.g. "$400 - $500"
-  minValue   Float    // lower bound of the price range (inclusive)
-  maxValue   Float?   // upper bound of the price range (inclusive); null = "and above"
-  percentage Float    // the percentage rate to apply for this range
+  label      String   // e.g. "$400 - $500" or "Standard rate"
+  isFlat     Boolean  @default(false) // true = flat percentage that applies to every project, no range
+  minValue   Float?   // lower bound of the price range (inclusive); null when isFlat
+  maxValue   Float?   // upper bound of the price range (inclusive); null = "and above", or when isFlat
+  percentage Float    // the percentage rate to apply
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
