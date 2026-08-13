@@ -79,6 +79,12 @@ model Task {
 
   history       TaskHistory[]
   notifications Notification[]
+
+  @@index([status])
+  @@index([priority])
+  @@index([assignedToId])
+  @@index([createdById])
+  @@index([createdAt])
 }
 
 model TaskHistory {
@@ -100,6 +106,21 @@ model Notification {
   task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
+
+model CompensationRange {
+  id         String   @id @default(cuid())
+  label      String   // e.g. "$400 - $500"
+  minValue   Float    // lower bound of the price range (inclusive)
+  maxValue   Float?   // upper bound of the price range (inclusive); null = "and above"
+  percentage Float    // the percentage rate to apply for this range
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([minValue])
 }
 
 model Hire {
@@ -123,4 +144,7 @@ model Hire {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([addedById])
 }
