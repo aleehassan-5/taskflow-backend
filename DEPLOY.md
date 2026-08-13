@@ -35,7 +35,7 @@ frontend ko backend ka URL chahiye).
    |---|---|
    | Root Directory | *(khali chhodo)* |
    | Build Command | `npm install && npx prisma generate && npm run build` |
-   | Start Command | `npx prisma migrate deploy && npm start` |
+   | Start Command | `npx prisma migrate deploy && npx prisma db seed && npm start` |
    | Instance Type | Free |
 
 4. **Environment** tab mein ye variables add karo:
@@ -49,11 +49,10 @@ frontend ko backend ka URL chahiye).
 6. Deploy complete hone pe upar ek URL milega, kuch aisa: `https://taskflow-backend-xxxx.onrender.com`
    — ye copy kar lo, Step 3 mein chahiye hoga
 
-7. Seed data daalne ke liye (optional, demo accounts ke liye): Render Dashboard → apni service →
-   **Shell** tab → yahan chalao:
-   ```bash
-   npx prisma db seed
-   ```
+7. Seed data (demo accounts) automatically ban jayenge — Start Command (Step 2.3) mein `prisma db seed`
+   already shamil hai, har deploy pe khud chal jata hai. Ye idempotent hai (upsert use karta hai), to
+   dobara chalne se koi duplicate ya masla nahi hota. Free tier pe Shell access nahi hota, isi liye ye
+   Start Command mein bake kiya gaya hai.
 
 > **Free tier note:** Render ki free web services 15 minute inactivity ke baad "sleep" ho jati hain
 > — pehli request pe wapas jagne mein ~30-50 second lag sakte hain. Normal hai, paid tier pe ye
@@ -87,7 +86,7 @@ Ab dono deployed hain, wapas Render pe jao:
    ```
 3. Save karo — service khud restart ho jayegi
 
-Ab Vercel wala frontend URL kholo, login karo (seed kiya hai to `ali@taskflow.dev` / `password123`)
+Ab Vercel wala frontend URL kholo, login karo (`ali@syntralogic.com` ya `arooj@syntralogic.com` / `ALLAH.pk87`)
 — sab kaam karna chahiye.
 
 ---
